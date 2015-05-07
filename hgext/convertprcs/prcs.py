@@ -25,8 +25,8 @@ class prcs_source(converter_source):
     def getheads(self):
         return []
 
-    def getchanges(self):
-        return []
+    def getchanges(self, version, full):
+        return [], {}, set()
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
