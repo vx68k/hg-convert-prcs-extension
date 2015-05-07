@@ -19,7 +19,7 @@ from hgext.convert.common import converter_source
 class prcs_source(converter_source):
     """Import a PRCS project."""
 
-    def __init__(self, ui, path = None, rev = None):
+    def __init__(self, ui, path=None, rev=None):
         super(prcs_source, self).__init__(ui, path, rev)
 
     def getheads(self):
