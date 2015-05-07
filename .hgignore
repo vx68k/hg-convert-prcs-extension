@@ -1,0 +1,9 @@
+# .hgignore
+
+# Python byte-compiled file:
+\.py[co]$
+
+# Backup and garbage files:
+~$
+\.orig$
+\.rej$
