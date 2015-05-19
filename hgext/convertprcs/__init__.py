@@ -14,7 +14,16 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hgext.convert.convcmd import source_converters
-from prcs import prcs_source
+from mercurial import extensions
 
-source_converters.append(('prcs', prcs_source, 'branchsort'))
+def extsetup(ui):
+    try:
+        global _convert
+        _convert = extensions.find('convert')
+
+        from prcs import prcs_source
+        _convert.convcmd.source_converters.append(
+                ('prcs', prcs_source, 'branchsort'))
+        ui.debug("The PRCS converter source was added\n")
+    except KeyError:
+        ui.warn("convertprcs setup failed since it depends on convert\n")

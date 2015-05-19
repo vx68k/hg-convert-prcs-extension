@@ -14,7 +14,12 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from hgext.convert.common import converter_source
+# from convert.common import converter_source
+from . import _convert
+_common = __import__(
+        _convert.__name__ + '.common', globals(), locals(),
+        ['converter_source'])
+converter_source = _common.converter_source
 
 class prcs_source(converter_source):
     """Import a PRCS project."""
