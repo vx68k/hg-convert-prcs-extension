@@ -28,15 +28,18 @@ class prcs_source(converter_source):
         super(prcs_source, self).__init__(ui, path, rev)
 
         try:
-            from prcslib import PrcsProject
-            self._prcs = PrcsProject(path)
+            from prcslib import PrcsProject, PrcsError, PrcsCommandError
         except ImportError:
-            ui.note("Module prcslib is not available")
+            ui.warn("Module prcslib is not available")
             raise _common.NoRepo()
 
-        self._revisions = self._prcs.revisions()
-        # FIXME: PrcsProject.revisions should raise an exception
-        if not self._revisions:
+        try:
+            self._prcs = PrcsProject(path)
+            self._revisions = self._prcs.revisions()
+        except PrcsCommandError as error:
+            ui.note(error.error_message)
+            raise _common.NoRepo()
+        except PrcsError:
             raise _common.NoRepo()
 
     def getheads(self):
