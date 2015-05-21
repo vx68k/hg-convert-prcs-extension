@@ -78,6 +78,8 @@ class prcs_source(converter_source):
                 self.ui.debug("The nearest ancestor is " + p + "\n")
             if p is not None:
                 parent.append(p)
+        for p in descriptor.mergeparents():
+            parent.append(p)
 
         m = _VERSION_RE.match(version)
         branch = m.group(1)
