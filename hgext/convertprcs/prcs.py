@@ -20,8 +20,9 @@ import re
 from . import _convert
 _common = __import__(
         _convert.__name__ + '.common', globals(), locals(),
-        ['converter_source'])
+        ['converter_source', 'commit'])
 converter_source = _common.converter_source
+commit = _common.commit
 
 from prcslib import PrcsProject, PrcsError, PrcsCommandError
 
@@ -55,8 +56,40 @@ class prcs_source(converter_source):
                 lambda (major, minor): major + "." + minor,
                 last_minor_version.iteritems())
 
-    def getchanges(self, version, full):
-        return [], {}, set()
+    def getchanges(self, version, full=False):
+        self.ui.debug("getchanges ", version, "\n")
+        return [], {}
+
+    def getcommit(self, version):
+        self.ui.debug("getcommit ", version, "\n")
+        revision = self._revision[version]
+        descriptor = self._prcs.descriptor(version)
+
+        parent = []
+        parent_major, parent_minor = descriptor.parentversion()
+        if parent_major is not None:
+            p = parent_major + "." + str(parent_minor)
+            if self._revision[p]['deleted']:
+                self.ui.debug("Parent version " + p + " was deleted\n")
+                p = self._nearest_ancestor(p)
+                self.ui.debug("The nearest ancestor is " + p + "\n")
+            if p is not None:
+                parent.append(p)
+        return commit(
+                revision['author'], revision['date'].isoformat(" "),
+                descriptor.message(), parent)
+
+    def _nearest_ancestor(self, version):
+        """Return an indirect parent for a deleted version."""
+        m = _VERSION_RE.match(version)
+        major, minor = m.groups()
+        minor = int(minor)
+        while self._revision[version]['deleted']:
+            minor -= 1
+            if minor == 0:
+                return None
+            version = major + "." + str(minor)
+        return version
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
