@@ -27,7 +27,10 @@ commit = _common.commit
 from prcslib import PrcsProject, PrcsError, PrcsCommandError
 
 # Regular expression pattern for splitting versions.
-_VERSION_RE = re.compile(r"(.*)\.(\d+)$")
+_VERSION_RE = re.compile(r"^(.*)\.(\d+)$")
+
+# Regular expression pattern that checks for main branches.
+_MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
 
 class prcs_source(converter_source):
     """Import a PRCS project."""
@@ -75,9 +78,14 @@ class prcs_source(converter_source):
                 self.ui.debug("The nearest ancestor is " + p + "\n")
             if p is not None:
                 parent.append(p)
+
+        m = _VERSION_RE.match(version)
+        branch = m.group(1)
+        if _MAIN_BRANCH_RE.match(branch):
+            branch = None
         return commit(
                 revision['author'], revision['date'].isoformat(" "),
-                descriptor.message(), parent)
+                descriptor.message(), parent, branch)
 
     def _nearest_ancestor(self, version):
         """Return an indirect parent for a deleted version."""
