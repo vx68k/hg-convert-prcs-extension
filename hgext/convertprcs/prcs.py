@@ -24,10 +24,7 @@ _common = __import__(
 converter_source = _common.converter_source
 commit = _common.commit
 
-from prcslib import PrcsProject, PrcsError, PrcsCommandError
-
-# Regular expression pattern for splitting versions.
-_VERSION_RE = re.compile(r"^(.*)\.(\d+)$")
+from prcslib import PrcsVersion, PrcsProject, PrcsError, PrcsCommandError
 
 # Regular expression pattern that checks for main branches.
 _MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
@@ -49,14 +46,13 @@ class prcs_source(converter_source):
 
     def getheads(self):
         last_minor_version = {}
-        for version in self._revision.iterkeys():
-            if not self._revision[version]['deleted']:
-                m = _VERSION_RE.match(version)
-                major, minor = m.groups()
-                if last_minor_version.get(major, 0) < minor:
-                    last_minor_version[major] = minor
+        for v in self._revision.iterkeys():
+            if not self._revision[v]['deleted']:
+                v = PrcsVersion(v)
+                if last_minor_version.get(v.major, 0) < v.minor:
+                    last_minor_version[v.major] = v.minor
         return map(
-                lambda (major, minor): major + "." + minor,
+                lambda (major, minor): str(PrcsVersion(major, minor)),
                 last_minor_version.iteritems())
 
     def getchanges(self, version, full=False):
@@ -69,20 +65,18 @@ class prcs_source(converter_source):
         descriptor = self._prcs.descriptor(version)
 
         parent = []
-        parent_major, parent_minor = descriptor.parentversion()
-        if parent_major is not None:
-            p = parent_major + "." + str(parent_minor)
-            if self._revision[p]['deleted']:
-                self.ui.debug("Parent version " + p + " was deleted\n")
+        p = descriptor.parentversion()
+        if p is not None:
+            if self._revision[str(p)]['deleted']:
+                self.ui.debug("Parent version ", p, " was deleted\n")
                 p = self._nearest_ancestor(p)
-                self.ui.debug("The nearest ancestor is " + p + "\n")
+                self.ui.debug("The nearest version is ", p, "\n")
             if p is not None:
-                parent.append(p)
+                parent.append(str(p))
         for p in descriptor.mergeparents():
             parent.append(p)
 
-        m = _VERSION_RE.match(version)
-        branch = m.group(1)
+        branch = PrcsVersion(version).major
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
@@ -91,14 +85,13 @@ class prcs_source(converter_source):
 
     def _nearest_ancestor(self, version):
         """Return an indirect parent for a deleted version."""
-        m = _VERSION_RE.match(version)
-        major, minor = m.groups()
-        minor = int(minor)
-        while self._revision[version]['deleted']:
-            minor -= 1
-            if minor == 0:
+        if isinstance(version, str):
+            version = PrcsVersion(version)
+
+        while self._revision[str(version)]['deleted']:
+            version.minor -= 1
+            if version.minor == 0:
                 return None
-            version = major + "." + str(minor)
         return version
 
     def gettags(self):
