@@ -20,12 +20,20 @@ from mercurial import extensions
 
 def extsetup(ui):
     try:
+        # import hgext.convert
         global _convert
         _convert = extensions.find('convert')
 
-        from prcs import prcs_source
-        _convert.convcmd.source_converters.append(
-                ('prcs', prcs_source, 'branchsort'))
+        # from hgext.convert.convcmd import source_converters
+        _convcmd = __import__(
+                _convert.__name__ + ".convcmd", globals(), locals(),
+                ['source_converters'])
+        source_converters = _convcmd.source_converters
+
+        # NOTE: The following import requires _convert
+        from .prcs import prcs_source
+        source_converters.append(('prcs', prcs_source, 'branchsort'))
+
         ui.debug("The PRCS converter source was added\n")
     except KeyError:
         ui.warn("convertprcs setup failed since it depends on convert\n")

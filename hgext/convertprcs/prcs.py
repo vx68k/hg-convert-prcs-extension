@@ -14,24 +14,20 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# from common import converter_source
+# from hgext.convert.common import converter_source
 from . import _convert
 _common = __import__(
         _convert.__name__ + '.common', globals(), locals(),
         ['converter_source'])
 converter_source = _common.converter_source
 
+from prcslib import PrcsProject, PrcsError, PrcsCommandError
+
 class prcs_source(converter_source):
     """Import a PRCS project."""
 
     def __init__(self, ui, path=None, rev=None):
         super(prcs_source, self).__init__(ui, path, rev)
-
-        try:
-            from prcslib import PrcsProject, PrcsError, PrcsCommandError
-        except ImportError:
-            ui.warn("Module prcslib is not available")
-            raise _common.NoRepo()
 
         try:
             self._prcs = PrcsProject(path)
