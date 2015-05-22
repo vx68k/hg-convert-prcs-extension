@@ -74,16 +74,20 @@ class prcs_source(converter_source):
         descriptor = self._descriptor(version)
 
         files = descriptor.files()
-        attributes = files[name]
-        if attributes.has_key('symlink'):
-            return (attributes['symlink'], 'l')
+        try:
+            attributes = files[name]
+            if attributes.has_key('symlink'):
+                return (attributes['symlink'], 'l')
 
-        self._prcs.checkout(version, [name])
-        file = open(name, 'rb')
-        content = file.read()
-        file.close()
-        # TODO: Remove the checked-out file if possible.
-        return (content, 'x' if attributes['mode'] & 0100 else '')
+            self._prcs.checkout(version, [name])
+            file = open(name, 'rb')
+            content = file.read()
+            file.close()
+            # TODO: Remove the checked-out file if possible.
+            return (content, 'x' if attributes['mode'] & 0100 else '')
+        except KeyError:
+            # The file with the specified name was deleted.
+            raise IOError()
 
     def getchanges(self, version, full=False):
         self.ui.debug("prcs_source.getchanges: ", version, "\n")
