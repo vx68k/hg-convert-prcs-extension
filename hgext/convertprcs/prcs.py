@@ -99,15 +99,32 @@ class prcs_source(converter_source):
         descriptor = self._descriptor(version)
 
         changes = []
+        files = descriptor.files()
         parent = descriptor.parentversion()
-        if parent is None:
+        if full or parent is None:
             # This is the initial checkin so all files are affected.
-            files = descriptor.files()
             for name in files.iterkeys():
                 changes.append((name, version))
         else:
-            # FIXME
-            pass
+            pf = self._descriptor(parent).files()
+            for name, attributes in files.iteritems():
+                if pf.has_key(name):
+                    pa = pf[name]
+                    if attributes.has_key('symlink'):
+                        if not pa.has_key('symlink'):
+                            # Changed from a regular file to a symlink.
+                            changes.append((name, version))
+                    elif pa.has_key('symlink'):
+                        # Changed from a symlink to a regular file.
+                        changes.append((name, version))
+                    elif attributes['id'] != pa['id'] \
+                            or attributes['revision'] != pa['revision'] \
+                            or (attributes['mode'] ^ pa['mode']) & 0100:
+                        changes.append((name, version))
+                else:
+                    # Added.
+                    changes.append((name, version))
+            # TODO: Handled deleted or renamed files.
         return (changes, {})
 
     def getcommit(self, version):
