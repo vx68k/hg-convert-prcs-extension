@@ -37,7 +37,7 @@ class prcs_source(converter_source):
 
         try:
             self._prcs = PrcsProject(path)
-            self._revision = self._prcs.revisions()
+            self._revisions = self._prcs.revisions()
         except PrcsCommandError as error:
             ui.note(error.error_message)
             raise _common.NoRepo()
@@ -59,8 +59,8 @@ class prcs_source(converter_source):
 
     def getheads(self):
         last_minor_version = {}
-        for v in self._revision.iterkeys():
-            if not self._revision[v]['deleted']:
+        for v in self._revisions.iterkeys():
+            if not self._revisions[v]['deleted']:
                 v = PrcsVersion(v)
                 if last_minor_version.get(v.major, 0) < v.minor:
                     last_minor_version[v.major] = v.minor
@@ -70,7 +70,7 @@ class prcs_source(converter_source):
 
     def getfile(self, name, version):
         self.ui.debug("prcs_source.getfile: ", name, " ", version, "\n")
-        revision = self._revision[version]
+        revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
         files = descriptor.files()
@@ -87,7 +87,7 @@ class prcs_source(converter_source):
 
     def getchanges(self, version, full=False):
         self.ui.debug("prcs_source.getchanges: ", version, "\n")
-        revision = self._revision[version]
+        revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
         changes = []
@@ -104,13 +104,13 @@ class prcs_source(converter_source):
 
     def getcommit(self, version):
         self.ui.debug("getcommit ", version, "\n")
-        revision = self._revision[version]
+        revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
         parent = []
         p = descriptor.parentversion()
         if p is not None:
-            if self._revision[str(p)]['deleted']:
+            if self._revisions[str(p)]['deleted']:
                 self.ui.debug("Parent version ", p, " was deleted\n")
                 p = self._nearest_ancestor(p)
                 self.ui.debug("The nearest version is ", p, "\n")
@@ -131,7 +131,7 @@ class prcs_source(converter_source):
         if isinstance(version, str):
             version = PrcsVersion(version)
 
-        while self._revision[str(version)]['deleted']:
+        while self._revisions[str(version)]['deleted']:
             version.minor -= 1
             if version.minor == 0:
                 return None
