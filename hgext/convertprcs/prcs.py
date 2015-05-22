@@ -15,6 +15,8 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import os
+import sys
 
 # from hgext.convert.common import converter_source
 from . import _convert
@@ -83,7 +85,9 @@ class prcs_source(converter_source):
             file = open(name, 'rb')
             content = file.read()
             file.close()
-            # TODO: Remove the checked-out file if possible.
+            # NOTE: Win32 does not always releases the file name.
+            if sys.platform != 'win32':
+                os.unlink(name)
             return (content, 'x' if attributes['mode'] & 0100 else '')
         except KeyError:
             # The file with the specified name was deleted.
