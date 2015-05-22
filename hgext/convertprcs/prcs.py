@@ -55,9 +55,39 @@ class prcs_source(converter_source):
                 lambda (major, minor): str(PrcsVersion(major, minor)),
                 last_minor_version.iteritems())
 
+    def getfile(self, name, version):
+        self.ui.debug("prcs_source.getfile: ", name, " ", version, "\n")
+        revision = self._revision[version]
+        descriptor = self._prcs.descriptor(version)
+
+        files = descriptor.files()
+        attributes = files[name]
+        if attributes.has_key('symlink'):
+            return (attributes['symlink'], 'l')
+
+        self._prcs.checkout(version, [name])
+        file = open(name, 'rb')
+        content = file.read()
+        file.close()
+        # TODO: Remove the checked-out file if possible.
+        return (content, 'x' if attributes['mode'] & 0100 else '')
+
     def getchanges(self, version, full=False):
-        self.ui.debug("getchanges ", version, "\n")
-        return [], {}
+        self.ui.debug("prcs_source.getchanges: ", version, "\n")
+        revision = self._revision[version]
+        descriptor = self._prcs.descriptor(version)
+
+        changes = []
+        parent = descriptor.parentversion()
+        if parent is None:
+            # This is the initial checkin so all files are affected.
+            files = descriptor.files()
+            for name in files.iterkeys():
+                changes.append((name, version))
+        else:
+            # FIXME
+            pass
+        return (changes, {})
 
     def getcommit(self, version):
         self.ui.debug("getcommit ", version, "\n")
