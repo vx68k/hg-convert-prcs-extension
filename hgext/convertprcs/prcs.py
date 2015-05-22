@@ -107,6 +107,7 @@ class prcs_source(converter_source):
                 changes.append((name, version))
         else:
             pf = self._descriptor(parent).files()
+            # Handling added or changed files.
             for name, attributes in files.iteritems():
                 if pf.has_key(name):
                     pa = pf[name]
@@ -124,7 +125,12 @@ class prcs_source(converter_source):
                 else:
                     # Added.
                     changes.append((name, version))
-            # TODO: Handled deleted or renamed files.
+            # Handling deleted or renamed files.
+            for name in pf.iterkeys():
+                if not files.has_key(name):
+                    # Removed (or renamed).
+                    # TODO: Handle renamed files.
+                    changes.append((name, version))
         return (changes, {})
 
     def getcommit(self, version):
