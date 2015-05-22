@@ -44,6 +44,19 @@ class prcs_source(converter_source):
         except PrcsError:
             raise _common.NoRepo()
 
+        self._cached_descriptor = {}
+
+    def _descriptor(self, version):
+        """Return a revision descriptor with caching."""
+        if not isinstance(version, str):
+            version = str(version)
+        if self._cached_descriptor.has_key(version):
+            return self._cached_descriptor[version]
+
+        descriptor = self._prcs.descriptor(version)
+        self._cached_descriptor[version] = descriptor
+        return descriptor
+
     def getheads(self):
         last_minor_version = {}
         for v in self._revision.iterkeys():
@@ -58,7 +71,7 @@ class prcs_source(converter_source):
     def getfile(self, name, version):
         self.ui.debug("prcs_source.getfile: ", name, " ", version, "\n")
         revision = self._revision[version]
-        descriptor = self._prcs.descriptor(version)
+        descriptor = self._descriptor(version)
 
         files = descriptor.files()
         attributes = files[name]
@@ -75,7 +88,7 @@ class prcs_source(converter_source):
     def getchanges(self, version, full=False):
         self.ui.debug("prcs_source.getchanges: ", version, "\n")
         revision = self._revision[version]
-        descriptor = self._prcs.descriptor(version)
+        descriptor = self._descriptor(version)
 
         changes = []
         parent = descriptor.parentversion()
@@ -92,7 +105,7 @@ class prcs_source(converter_source):
     def getcommit(self, version):
         self.ui.debug("getcommit ", version, "\n")
         revision = self._revision[version]
-        descriptor = self._prcs.descriptor(version)
+        descriptor = self._descriptor(version)
 
         parent = []
         p = descriptor.parentversion()
