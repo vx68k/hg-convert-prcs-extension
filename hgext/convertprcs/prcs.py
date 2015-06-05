@@ -59,6 +59,25 @@ class prcs_source(converter_source):
         self._cached_descriptor[version] = descriptor
         return descriptor
 
+    def _nearest_ancestor(self, version):
+        """Return an indirect parent for a deleted version."""
+        if version is None:
+            return None
+        if isinstance(version, str):
+            version = PrcsVersion(version)
+
+        deleted = False
+        while self._revisions[str(version)]['deleted']:
+            self.ui.note(version, " is deleted\n")
+            deleted = True
+            version.minor -= 1
+            if version.minor == 0:
+                self.ui.note("No more ancestors on branch ", version.major)
+                return None
+        if deleted:
+            self.ui.note("substituting ", version, "\n")
+        return version
+
     def getheads(self):
         last_minor_version = {}
         for v in self._revisions.iterkeys():
@@ -103,13 +122,15 @@ class prcs_source(converter_source):
 
         changes = []
         files = descriptor.files()
-        parent = descriptor.parentversion()
-        if full or parent is None:
+        p = descriptor.parentversion()
+        # Preparing for a deleted parent.
+        p = self._nearest_ancestor(p)
+        if full or p is None:
             # This is the initial checkin so all files are affected.
             for name in files.iterkeys():
                 changes.append((name, version))
         else:
-            pf = self._descriptor(parent).files()
+            pf = self._descriptor(p).files()
             # Handling added or changed files.
             for name, attributes in files.iteritems():
                 if pf.has_key(name):
@@ -141,35 +162,24 @@ class prcs_source(converter_source):
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
-        parent = []
+        parents = []
         p = descriptor.parentversion()
+        # Preparing for a deleted parent.
+        p = self._nearest_ancestor(p)
         if p is not None:
-            if self._revisions[str(p)]['deleted']:
-                self.ui.debug("Parent version ", p, " was deleted\n")
-                p = self._nearest_ancestor(p)
-                self.ui.debug("The nearest version is ", p, "\n")
-            if p is not None:
-                parent.append(str(p))
-        for p in descriptor.mergeparents():
-            parent.append(p)
+            parents.append(str(p))
+        for mp in descriptor.mergeparents():
+            # Preparing for a deleted merge parent.
+            mp = self._nearest_ancestor(mp)
+            if mp is not None:
+                parents.append(str(mp))
 
         branch = PrcsVersion(version).major
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
                 revision['author'], revision['date'].isoformat(" "),
-                descriptor.message(), parent, branch)
-
-    def _nearest_ancestor(self, version):
-        """Return an indirect parent for a deleted version."""
-        if isinstance(version, str):
-            version = PrcsVersion(version)
-
-        while self._revisions[str(version)]['deleted']:
-            version.minor -= 1
-            if version.minor == 0:
-                return None
-        return version
+                descriptor.message(), parents, branch)
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
