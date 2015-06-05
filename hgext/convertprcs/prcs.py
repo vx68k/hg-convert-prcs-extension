@@ -88,6 +88,9 @@ class prcs_source(converter_source):
             # NOTE: Win32 does not always releases the file name.
             if sys.platform != 'win32':
                 os.unlink(name)
+                dir = os.path.dirname(name)
+                if dir:
+                    os.removedirs(dir)
             return (content, 'x' if attributes['mode'] & 0100 else '')
         except KeyError:
             # The file with the specified name was deleted.
