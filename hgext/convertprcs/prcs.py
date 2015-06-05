@@ -169,7 +169,7 @@ class prcs_source(converter_source):
         return (files, copies)
 
     def getcommit(self, version):
-        self.ui.debug("getcommit ", version, "\n")
+        self.ui.debug("prcs_source.getcommit: ", version, "\n")
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
