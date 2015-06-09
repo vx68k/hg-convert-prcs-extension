@@ -59,6 +59,25 @@ class prcs_source(converter_source):
         self._cached_descriptor[version] = descriptor
         return descriptor
 
+    def _nearest_ancestor(self, version):
+        """Return an indirect parent for a deleted version."""
+        if version is None:
+            return None
+        if isinstance(version, str):
+            version = PrcsVersion(version)
+
+        deleted = False
+        while self._revisions[str(version)]['deleted']:
+            self.ui.note(version, " is deleted\n")
+            deleted = True
+            version.minor -= 1
+            if version.minor == 0:
+                self.ui.note("No more ancestors on branch ", version.major)
+                return None
+        if deleted:
+            self.ui.note("substituting ", version, "\n")
+        return version
+
     def getheads(self):
         last_minor_version = {}
         for v in self._revisions.iterkeys():
@@ -77,9 +96,9 @@ class prcs_source(converter_source):
 
         files = descriptor.files()
         try:
-            attributes = files[name]
-            if attributes.has_key('symlink'):
-                return (attributes['symlink'], 'l')
+            a = files[name]
+            if a.has_key('symlink'):
+                return (a['symlink'], 'l')
 
             self._prcs.checkout(version, [name])
             file = open(name, 'rb')
@@ -88,7 +107,10 @@ class prcs_source(converter_source):
             # NOTE: Win32 does not always releases the file name.
             if sys.platform != 'win32':
                 os.unlink(name)
-            return (content, 'x' if attributes['mode'] & 0100 else '')
+                dir = os.path.dirname(name)
+                if dir:
+                    os.removedirs(dir)
+            return (content, 'x' if a['mode'] & 0100 else '')
         except KeyError:
             # The file with the specified name was deleted.
             raise IOError()
@@ -98,75 +120,77 @@ class prcs_source(converter_source):
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
-        changes = []
-        files = descriptor.files()
-        parent = descriptor.parentversion()
-        if full or parent is None:
+        files = []
+        copies = {}
+        f = descriptor.files()
+        p = descriptor.parentversion()
+        # Preparing for a deleted parent.
+        p = self._nearest_ancestor(p)
+        if full or p is None:
             # This is the initial checkin so all files are affected.
-            for name in files.iterkeys():
-                changes.append((name, version))
+            for name in f.iterkeys():
+                files.append((name, version))
         else:
-            pf = self._descriptor(parent).files()
+            pf = self._descriptor(p).files()
             # Handling added or changed files.
-            for name, attributes in files.iteritems():
+            for name, a in f.iteritems():
                 if pf.has_key(name):
                     pa = pf[name]
-                    if attributes.has_key('symlink'):
+                    if a.has_key('symlink'):
                         if not pa.has_key('symlink'):
                             # Changed from a regular file to a symlink.
-                            changes.append((name, version))
+                            files.append((name, version))
                     elif pa.has_key('symlink'):
                         # Changed from a symlink to a regular file.
-                        changes.append((name, version))
-                    elif attributes['id'] != pa['id'] \
-                            or attributes['revision'] != pa['revision'] \
-                            or (attributes['mode'] ^ pa['mode']) & 0100:
-                        changes.append((name, version))
+                        files.append((name, version))
+                    elif a['id'] != pa['id'] \
+                            or a['revision'] != pa['revision'] \
+                            or (a['mode'] ^ pa['mode']) & 0100:
+                        files.append((name, version))
                 else:
                     # Added.
-                    changes.append((name, version))
+                    files.append((name, version))
             # Handling deleted or renamed files.
-            for name in pf.iterkeys():
-                if not files.has_key(name):
+            pnamebyid = {}
+            for pname, pa in pf.iteritems():
+                if not f.has_key(pname):
                     # Removed (or renamed).
-                    # TODO: Handle renamed files.
-                    changes.append((name, version))
-        return (changes, {})
+                    files.append((pname, version))
+                if not pa.has_key('symlink'):
+                    pnamebyid[pa['id']] = pname
+            # Handling renamed files for copies.
+            for name, a in f.iteritems():
+                if not a.has_key('symlink') and \
+                        pnamebyid.has_key(a['id']):
+                    pname = pnamebyid[a['id']]
+                    if name != pname:
+                        self.ui.note(pname, " was renamed to ", name, "\n")
+                        copies[name] = pname
+        return (files, copies)
 
     def getcommit(self, version):
-        self.ui.debug("getcommit ", version, "\n")
+        self.ui.debug("prcs_source.getcommit: ", version, "\n")
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
-        parent = []
+        parents = []
         p = descriptor.parentversion()
+        # Preparing for a deleted parent.
+        p = self._nearest_ancestor(p)
         if p is not None:
-            if self._revisions[str(p)]['deleted']:
-                self.ui.debug("Parent version ", p, " was deleted\n")
-                p = self._nearest_ancestor(p)
-                self.ui.debug("The nearest version is ", p, "\n")
-            if p is not None:
-                parent.append(str(p))
-        for p in descriptor.mergeparents():
-            parent.append(p)
+            parents.append(str(p))
+        for mp in descriptor.mergeparents():
+            # Preparing for a deleted merge parent.
+            mp = self._nearest_ancestor(mp)
+            if mp is not None:
+                parents.append(str(mp))
 
         branch = PrcsVersion(version).major
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
                 revision['author'], revision['date'].isoformat(" "),
-                descriptor.message(), parent, branch)
-
-    def _nearest_ancestor(self, version):
-        """Return an indirect parent for a deleted version."""
-        if isinstance(version, str):
-            version = PrcsVersion(version)
-
-        while self._revisions[str(version)]['deleted']:
-            version.minor -= 1
-            if version.minor == 0:
-                return None
-        return version
+                descriptor.message(), parents, branch)
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
