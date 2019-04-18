@@ -1,9 +1,8 @@
-# .hgignore
-
-# Python byte-compiled file:
-\.py[co]$
-
-# Backup and garbage files:
-~$
-\.orig$
+syntax: regexp
+(^|/)dist$
+(^|/)build$
+\.egg-info$
+\.pyc$
 \.rej$
+\.orig$
+~$
