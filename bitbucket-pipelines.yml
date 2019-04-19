@@ -1,0 +1,53 @@
+# bitbucket-pipelines.yml - Bitbucket Pipelines configuration
+# Copyright (C) 2016-2019 Kaz Nishimura
+#
+# Copying and distribution of this file, with or without modification, are
+# permitted in any medium without royalty provided the copyright notice and
+# this notice are preserved.  This file is offered as-is, without any warranty.
+
+# See <https://confluence.atlassian.com/bitbucket/configure-bitbucket-pipelines-yml-792298910.html>
+# for details.
+---
+definitions:
+  steps:
+    - step: &test
+        name: Test
+        caches:
+          - pip
+        script:
+          - pip install setuptools
+          - python ./setup.py test
+    - step: &deploy-pypi
+        name: PyPI deployment
+        deployment: production
+        script:
+          - pipe: atlassian/pypi-publish:0.2.4
+            variables:
+              PYPI_USERNAME: $PYPI_USERNAME
+              PYPI_PASSWORD: $PYPI_PASSWORD
+    - step: &deploy-testpypi
+        name: TestPyPI deployment
+        deployment: test
+        script:
+          - pipe: atlassian/pypi-publish:0.2.4
+            variables:
+              PYPI_USERNAME: $TESTPYPI_USERNAME
+              PYPI_PASSWORD: $TESTPYPI_PASSWORD
+              REPOSITORY: https://test.pypi.org/legacy/
+image: python:3
+pipelines:
+  default:
+    - step: *test
+  branches:
+    # Overrides the default pipeline.
+    deployment:
+      - step:
+          script:
+            - ": nothing"
+  bookmarks:
+    deployment/test:
+      - step: *deploy-testpypi
+    deployment/staging:
+      - step:
+          <<: *deploy-testpypi
+          deployment: staging
