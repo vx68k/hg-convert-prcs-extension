@@ -15,7 +15,7 @@ definitions:
         caches:
           - pip
         script:
-          - pip install setuptools
+          - pip install setuptools mercurial
           - python ./setup.py test
     - step: &deploy-pypi
         name: PyPI deployment
