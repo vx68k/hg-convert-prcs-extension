@@ -54,7 +54,7 @@ if __name__ == "__main__":
         long_description=long_description(),
         long_description_content_type="text/markdown",
         classifiers=[
-            "License :: OSI Approved :: GNU General Public License v3 or later",
+            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Programming Language :: Python :: 3",
         ],
         requires=["prcslib"],
