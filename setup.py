@@ -59,7 +59,7 @@ if __name__ == "__main__":
         ],
         python_requires=">= 3",
         install_requires=[
-            "mercurial",
+            "mercurial < 4.5",
             "prcslib"
         ],
 
