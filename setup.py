@@ -66,5 +66,5 @@ if __name__ == "__main__":
         python_requires=">= 3",
 
         packages=find_packages(exclude=["testsuite", "testsuite.*"]),
-        test_suite="testsuite",
+#        test_suite="testsuite",
     )
