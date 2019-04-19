@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "process",
+            "command": "${config:python.pythonPath}",
+            "args": [
+                "./setup.py",
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test",
+            "type": "process",
+            "command": "${config:python.pythonPath}",
+            "args": [
+                "./setup.py",
+                "test"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "type": "process",
+            "command": "${config:python.pythonPath}",
+            "args": [
+                "./setup.py",
+                "clean"
+            ],
+            "group": "none"
+        }
+    ]
+}
