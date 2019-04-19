@@ -57,8 +57,11 @@ if __name__ == "__main__":
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Programming Language :: Python :: 3",
         ],
-        requires=["prcslib"],
         python_requires=">= 3",
+        install_requires=[
+            "mercurial",
+            "prcslib"
+        ],
 
         packages=find_packages(exclude=["testsuite", "testsuite.*"]),
 #        test_suite="testsuite",
