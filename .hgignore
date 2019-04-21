@@ -1,4 +1,5 @@
 syntax: regexp
+(^|/)nbproject/private$
 (^|/)dist$
 (^|/)build$
 \.egg-info$
