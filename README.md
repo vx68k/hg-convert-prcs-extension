@@ -1,4 +1,6 @@
-# READ ME
+This file documents the hgext3rd.convertprcs package for Python.
+
+# Introduction
 
 This directory contains the source code for the
 [PRCS](http://prcs.sourceforge.net/) source add-on for the [Convert
