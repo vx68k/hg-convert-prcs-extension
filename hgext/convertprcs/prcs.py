@@ -110,7 +110,7 @@ class prcs_source(converter_source):
                 dir = os.path.dirname(name)
                 if dir:
                     os.removedirs(dir)
-            return (content, 'x' if a['mode'] & 0100 else '')
+            return (content, 'x' if a['mode'] & (0x1 << 6) else '')
         except KeyError:
             # The file with the specified name was deleted.
             raise IOError()
@@ -145,7 +145,7 @@ class prcs_source(converter_source):
                         files.append((name, version))
                     elif a['id'] != pa['id'] \
                             or a['revision'] != pa['revision'] \
-                            or (a['mode'] ^ pa['mode']) & 0100:
+                            or (a['mode'] ^ pa['mode']) & (0x1 << 6):
                         files.append((name, version))
                 else:
                     # Added.
