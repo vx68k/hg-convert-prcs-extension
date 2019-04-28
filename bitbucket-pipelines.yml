@@ -35,7 +35,7 @@ definitions:
               PYPI_USERNAME: $TESTPYPI_USERNAME
               PYPI_PASSWORD: $TESTPYPI_PASSWORD
               REPOSITORY: https://test.pypi.org/legacy/
-image: python:2.7
+image: python:3
 pipelines:
   default:
     - step: *test

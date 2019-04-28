@@ -55,10 +55,9 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-            "Programming Language :: Python :: 2.7",
             "Programming Language :: Python :: 3",
         ],
-        python_requires=">= 2.7",
+        python_requires=">= 3",
         install_requires=[
             "mercurial",
             "prcslib"
