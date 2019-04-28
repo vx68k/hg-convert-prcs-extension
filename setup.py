@@ -57,9 +57,9 @@ if __name__ == "__main__":
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Programming Language :: Python :: 3",
         ],
-        python_requires=">= 3",
+        python_requires=">= 3.4",
         install_requires=[
-            "mercurial",
+            "mercurial > 5.0rc0",
             "prcslib"
         ],
 
