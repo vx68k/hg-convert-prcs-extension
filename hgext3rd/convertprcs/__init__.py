@@ -18,10 +18,11 @@
 
 from mercurial import extensions
 
+_convert = None
+
 def extsetup(ui):
     try:
         # import hgext.convert
-        global _convert
         _convert = extensions.find('convert')
 
         # from hgext.convert.convcmd import source_converters
