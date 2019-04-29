@@ -3,6 +3,5 @@
         "**/*.rej": true,
         "**/*.orig": true,
         "**/*~": true
-    },
-    "python.linting.pylintEnabled": true
+    }
 }
