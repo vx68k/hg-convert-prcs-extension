@@ -16,7 +16,6 @@ definitions:
           - pip
         script:
           - pip install setuptools
-          - pip install -i https://test.pypi.org/simple/ prcslib
           - HGPYTHON3=yes python ./setup.py test
     - step: &deploy-pypi
         name: PyPI deployment
