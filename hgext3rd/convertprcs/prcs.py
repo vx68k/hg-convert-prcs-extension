@@ -86,8 +86,8 @@ class prcs_source(converter_source):
                 if last_minor_version.get(v.major, 0) < v.minor:
                     last_minor_version[v.major] = v.minor
         return map(
-                lambda (major, minor): str(PrcsVersion(major, minor)),
-                last_minor_version.iteritems())
+            lambda item: str(PrcsVersion(item[0], item[1])),
+            last_minor_version.iteritems())
 
     def getfile(self, name, version):
         self.ui.debug("prcs_source.getfile: ", name, " ", version, "\n")
