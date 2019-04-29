@@ -26,6 +26,7 @@ definitions:
             variables:
               PYPI_USERNAME: $PYPI_USERNAME
               PYPI_PASSWORD: $PYPI_PASSWORD
+              DISTRIBUTIONS: sdist bdist_wheel
     - step: &deploy-testpypi
         name: TestPyPI deployment
         deployment: test
@@ -34,21 +35,21 @@ definitions:
             variables:
               PYPI_USERNAME: $TESTPYPI_USERNAME
               PYPI_PASSWORD: $TESTPYPI_PASSWORD
+              DISTRIBUTIONS: sdist bdist_wheel
               REPOSITORY: https://test.pypi.org/legacy/
 image: python:3
 pipelines:
-  default:
-    - step: *test
   branches:
-    # Overrides the default pipeline.
-    deployment:
-      - step:
-          script:
-            - ": nothing"
+    default:
+      - step: *test
   bookmarks:
     deployment/test:
       - step: *deploy-testpypi
     deployment/staging:
       - step:
-          <<: *deploy-testpypi
+          name: Version check
+          script:
+            - python ./setup.py --version | grep -v '\.dev[0-9]'
+      - step:
+          <<: *deploy-pypi
           deployment: staging
