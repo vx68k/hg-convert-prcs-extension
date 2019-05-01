@@ -1,5 +1,5 @@
-# prcs.py for convertprcs
-# Copyright (C) 2015 Kaz Nishimura
+# hgext3rd.convert.prcs - Mercurial convert source for PRCS
+# Copyright (C) 2015-2019 Kaz Nishimura
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -13,19 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+"""Mercurial convert source for PRCS
+"""
 
 import re
 import os
 import sys
-
-# from hgext.convert.common import converter_source
-from . import _convert
-_common = __import__(
-        _convert.__name__ + '.common', globals(), locals(),
-        ['converter_source', 'commit'])
-converter_source = _common.converter_source
-commit = _common.commit
-
+from mercurial import extensions
+from hgext.convert.common import NoRepo, commit, converter_source
+from hgext.convert.convcmd import source_converters
 from prcslib import PrcsVersion, PrcsProject, PrcsError, PrcsCommandError
 
 # Regular expression pattern that checks for main branches.
@@ -42,9 +41,9 @@ class prcs_source(converter_source):
             self._revisions = self._prcs.revisions()
         except PrcsCommandError as error:
             ui.note(error.error_message)
-            raise _common.NoRepo()
+            raise NoRepo()
         except PrcsError:
-            raise _common.NoRepo()
+            raise NoRepo()
 
         self._cached_descriptor = {}
 
@@ -195,3 +194,6 @@ class prcs_source(converter_source):
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
         return {}
+
+def extsetup(ui):
+    source_converters.append(('prcs', prcs_source, 'branchsort'))
