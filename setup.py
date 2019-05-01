@@ -64,5 +64,6 @@ if __name__ == "__main__":
         ],
 
         packages=find_packages(exclude=["testsuite", "testsuite.*"]),
+        py_modules=["hgext3rd/convert/prcs"],
         test_suite="testsuite",
     )
