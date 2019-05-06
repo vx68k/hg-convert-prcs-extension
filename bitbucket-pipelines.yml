@@ -15,11 +15,11 @@ definitions:
         caches:
           - pip
         script:
-          - pip install setuptools
-          - HGPYTHON3=yes python ./setup.py test
+          - pip install "setuptools>=38.6"
+          - export HGPYTHON3=yes
+          - python ./setup.py test
     - step: &deploy-pypi
         name: PyPI deployment
-        deployment: production
         script:
           - pipe: atlassian/pypi-publish:0.2.5
             variables:
@@ -28,7 +28,6 @@ definitions:
               DISTRIBUTIONS: sdist bdist_wheel
     - step: &deploy-testpypi
         name: TestPyPI deployment
-        deployment: test
         script:
           - pipe: atlassian/pypi-publish:0.2.5
             variables:
@@ -43,7 +42,9 @@ pipelines:
       - step: *test
   bookmarks:
     deployment/test:
-      - step: *deploy-testpypi
+      - step:
+          <<: *deploy-testpypi
+          deployment: test
     deployment/staging:
       - step:
           name: Version check
@@ -51,4 +52,14 @@ pipelines:
             - python ./setup.py --version | grep -v '\.dev[0-9]'
       - step:
           <<: *deploy-pypi
+          trigger: manual
           deployment: staging
+    deployment/production:
+      - step:
+          name: Version check
+          script:
+            - python ./setup.py --version | grep -v '\.dev[0-9]'
+      - step:
+          <<: *deploy-pypi
+          trigger: manual
+          deployment: production
