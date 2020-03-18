@@ -39,6 +39,9 @@
           pool:
             vmImage: ubuntu-latest
           steps:
+            - checkout: none
+            - download: current
+              artifact: dist
             - task: UsePythonVersion@0
             - bash: |
                 pip install twine
