@@ -19,17 +19,11 @@
 """setup script for the hg-convert-prcs package
 """
 
-from os import getenv, path
+from os import path
 from setuptools import setup, find_packages
 
-def version_suffix():
-    """returns the version suffix
-    """
-    value = "a1"
-    build = getenv("BITBUCKET_BUILD_NUMBER")
-    if build is not None:
-        value = ".dev" + build
-    return value
+# Package version.
+PACKAGE_VERSION = "1a1"
 
 def long_description():
     """return the long description from the 'README.md' file
@@ -46,7 +40,7 @@ def long_description():
 if __name__ == "__main__":
     setup(
         name="hg-convert-prcs",
-        version="1.0" + version_suffix(),
+        version=PACKAGE_VERSION,
         description="PRCS source for the Mercurial convert extension.",
         url="https://vx68k.bitbucket.io/hg-convert-prcs/",
         author="Kaz Nishimura",
