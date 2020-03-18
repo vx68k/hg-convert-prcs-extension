@@ -194,6 +194,3 @@ class prcs_source(converter_source):
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
         return {}
-
-def extsetup(ui):
-    source_converters.append(('prcs', prcs_source, 'branchsort'))
