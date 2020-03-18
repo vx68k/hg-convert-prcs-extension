@@ -1,4 +1,4 @@
-# hgext3rd/convert/prcs/__init__.py - package hgext3rd.convert.prcs
+# __init__.py - initialization of the 'hgext3rd.convert_prcs' package
 # Copyright (C) 2020 Kaz Nishimura
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -26,7 +26,7 @@ from .prcs import prcs_source
 
 def extsetup(ui):
     """
-    set up the convert.prcs extension
+    set up the 'convert_prcs' extension
     """
     source_converters.append(
         (b"prcs", prcs_source, b"branchsort")
