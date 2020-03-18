@@ -29,13 +29,13 @@ def long_description():
     """return the long description from the 'README.md' file
     """
     cwd = path.abspath(path.dirname(__file__))
-    with open(path.join(cwd, "README.md"), encoding="UTF-8") as file:
+    with open(path.join(cwd, "README.md"), encoding="UTF-8") as stream:
         # To ignore lines until a level-1 ATX header is found.
         while True:
-            line = file.readline()
+            line = stream.readline()
             if line.startswith("# "):
                 break
-        return line + file.read()
+        return line + stream.read()
 
 if __name__ == "__main__":
     setup(
