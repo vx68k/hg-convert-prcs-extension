@@ -1,0 +1,55 @@
+# azure-pipelines.yml - configuration for Azure Pipelines
+# Copyright (C) 2020 Kaz Nishimura
+#
+# Copying and distribution of this file, with or without modification, are
+# permitted in any medium without royalty provided the copyright notice and
+# this notice are preserved.  This file is offered as-is, without any warranty.
+---
+  trigger:
+    - master
+    - release/**
+    - feature/**
+  stages:
+    - stage: Default
+      jobs:
+        - job: Build
+          pool:
+            vmImage: ubuntu-latest
+          steps:
+            - task: UsePythonVersion@0
+            - bash: |
+                pip install "setuptools>=38.6" wheel
+              displayName: Install dependencies
+            - bash: |
+                python ./setup.py test
+              displayName: Test
+            - task: PublishTestResults@2
+            - bash: |
+                python ./setup.py sdist bdist_wheel
+              displayName: Create archives
+            - publish: dist
+              artifact: dist
+    - stage: Release
+      condition: >-
+        and(succeeded(),
+          startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+      jobs:
+        - job: Upload
+          displayName: Upload to PyPI
+          pool:
+            vmImage: ubuntu-latest
+          steps:
+            - checkout: none
+            - download: current
+              artifact: dist
+            - task: UsePythonVersion@0
+            - bash: |
+                pip install twine
+              displayName: Install dependencies
+            - task: TwineAuthenticate@1
+              inputs:
+                pythonUploadServiceConnection: pypi
+            - bash: |
+                twine upload -r pypi --config-file $(PYPIRC_PATH) \
+                    $(Pipeline.Workspace)/dist/*
+              displayName: Upload
