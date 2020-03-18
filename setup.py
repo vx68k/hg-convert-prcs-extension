@@ -21,7 +21,7 @@ setup script for the 'hg-convert-prcs' package
 """
 
 from os import path
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # Package version.
 PACKAGE_VERSION = "1a1"
