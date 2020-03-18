@@ -22,6 +22,12 @@ Mercurial extension to enable the PRCS source for the Convert extension
 
 from __future__ import absolute_import
 from hgext.convert.convcmd import source_converters
+from .prcs import prcs_source
 
 def extsetup(ui):
-    pass
+    """
+    set up the convert.prcs extension
+    """
+    source_converters.append(
+        (b"prcs", prcs_source, b"branchsort")
+    )
