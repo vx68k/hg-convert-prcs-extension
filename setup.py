@@ -16,7 +16,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""setup script for the hg-convert-prcs package
+"""
+setup script for the 'hg-convert-prcs' package
 """
 
 from os import path
@@ -26,7 +27,8 @@ from setuptools import setup, find_packages
 PACKAGE_VERSION = "1a1"
 
 def long_description():
-    """return the long description from the 'README.md' file
+    """
+    return the long description from the 'README.md' file
     """
     cwd = path.abspath(path.dirname(__file__))
     with open(path.join(cwd, "README.md")) as stream:
