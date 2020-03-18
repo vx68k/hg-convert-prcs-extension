@@ -59,7 +59,8 @@ if __name__ == "__main__":
             "prcslib >= 1.0b2"
         ],
 
-        packages=find_packages(exclude=["testsuite", "testsuite.*"]),
-        py_modules=["hgext3rd/convert/prcs"],
+        packages=[
+            "hgext3rd.convert.prcs"
+        ],
         test_suite="testsuite",
     )
