@@ -24,6 +24,8 @@ from __future__ import absolute_import
 from hgext.convert.convcmd import source_converters
 from .prcs import prcs_source
 
+testedwith = "5.2.2"
+
 def extsetup(ui):
     """
     set up the 'convert_prcs' extension
