@@ -24,7 +24,7 @@ from os import path
 from setuptools import setup
 
 # Package version.
-PACKAGE_VERSION = "1a1"
+PACKAGE_VERSION = "1a2"
 
 def long_description():
     """
