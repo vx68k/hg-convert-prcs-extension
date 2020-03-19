@@ -1,4 +1,4 @@
-# prcs.py - Mercurial convert source for PRCS
+# prcs.py - PRCS source for the Mercurial convert extension
 # Copyright (C) 2015-2020 Kaz Nishimura
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -16,7 +16,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Mercurial convert source for PRCS
+"""
+PRCS source for the Mercurial convert extension
 """
 
 import re
@@ -31,7 +32,9 @@ from prcslib import PrcsVersion, PrcsProject, PrcsError, PrcsCommandError
 _MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
 
 class prcs_source(converter_source):
-    """Import a PRCS project."""
+    """
+    PRCS source class.
+    """
 
     def __init__(self, ui, type, path, revs=None):
         """
