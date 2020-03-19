@@ -33,17 +33,17 @@ _MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
 class prcs_source(converter_source):
     """Import a PRCS project."""
 
-    def __init__(self, ui, path=None, rev=None):
-        super(prcs_source, self).__init__(ui, path, rev)
+    def __init__(self, ui, type, path, revs=None):
+        """
+        initialize a PRCS source
+        """
+        super(prcs_source, self).__init__(ui, type, path, revs)
 
         try:
             self._prcs = PrcsProject(path)
-            self._revisions = self._prcs.revisions()
-        except PrcsCommandError as error:
-            ui.note(error.error_message)
-            raise NoRepo()
+            self._revisions = self._prcs.versions()
         except PrcsError:
-            raise NoRepo()
+            raise NoRepo(b"%s does not look like a PRCS project" % path)
 
         self._cached_descriptor = {}
 
