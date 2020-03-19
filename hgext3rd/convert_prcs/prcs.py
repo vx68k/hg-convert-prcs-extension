@@ -69,9 +69,9 @@ class prcs_source(converter_source):
         while self._revisions[str(version)]['deleted']:
             self.ui.note(version, " is deleted\n")
             deleted = True
-            version.minor -= 1
-            if version.minor == 0:
-                self.ui.note("No more ancestors on branch ", version.major)
+            version = PrcsVersion(version.major(), version.minor() - 1)
+            if version.minor() == 0:
+                self.ui.note("No more ancestors on branch ", version.major())
                 return None
         if deleted:
             self.ui.note("substituting ", version, "\n")
@@ -82,8 +82,8 @@ class prcs_source(converter_source):
         for v in self._revisions.iterkeys():
             if not self._revisions[v]['deleted']:
                 v = PrcsVersion(v)
-                if last_minor_version.get(v.major, 0) < v.minor:
-                    last_minor_version[v.major] = v.minor
+                if last_minor_version.get(v.major(), 0) < v.minor():
+                    last_minor_version[v.major()] = v.minor()
         return map(
             lambda item: str(PrcsVersion(item[0], item[1])),
             last_minor_version.iteritems())
@@ -184,7 +184,7 @@ class prcs_source(converter_source):
             if mp is not None:
                 parents.append(str(mp))
 
-        branch = PrcsVersion(version).major
+        branch = PrcsVersion(version).major()
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
