@@ -165,7 +165,7 @@ class prcs_source(converter_source):
                     if name != pname:
                         self.ui.note(pname, " was renamed to ", name, "\n")
                         copies[name] = pname
-        return (files, copies)
+        return files, copies, set()
 
     def getcommit(self, version):
         self.ui.debug("prcs_source.getcommit: ", version, "\n")
