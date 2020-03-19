@@ -46,7 +46,7 @@ if __name__ == "__main__":
         description="PRCS source for the Mercurial convert extension.",
         url="https://vx68k.bitbucket.io/hg-convert-prcs/",
         author="Kaz Nishimura",
-        author_email="kazssym@vx68k.org",
+        author_email="kazssym@linuxfront.com",
         long_description=long_description(),
         long_description_content_type="text/markdown",
         classifiers=[
