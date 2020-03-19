@@ -1,4 +1,4 @@
-# setup.py - setup script for the 'hg-convert-prcs' package
+# setup.py - setup script for the 'hg-convert-prcs-extension' package
 # Copyright (C) 2019-2020 Kaz Nishimura
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
-setup script for the 'hg-convert-prcs' package
+setup script for the 'hg-convert-prcs-extension' package
 """
 
 from os import path
@@ -41,7 +41,7 @@ def long_description():
 
 if __name__ == "__main__":
     setup(
-        name="hg-convert-prcs",
+        name="hg-convert-prcs-extension",
         version=PACKAGE_VERSION,
         description="PRCS source for the Mercurial convert extension.",
         url="https://vx68k.bitbucket.io/hg-convert-prcs/",
