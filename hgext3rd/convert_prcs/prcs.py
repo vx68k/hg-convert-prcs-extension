@@ -115,7 +115,7 @@ class prcs_source(converter_source):
             return (content, 'x' if a['mode'] & (0x1 << 6) else '')
         except KeyError:
             # The file with the specified name was deleted.
-            raise IOError()
+            return None, None
 
     def getchanges(self, version, full=False):
         self.ui.debug("prcs_source.getchanges: ", version, "\n")
