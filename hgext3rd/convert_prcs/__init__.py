@@ -24,7 +24,7 @@ convert a PRCS project to a new Mercurial repository.
 """
 
 from __future__ import absolute_import, unicode_literals
-from hgext.convert.convcmd import source_converters
+from hgext.convert import convcmd
 from .prcs import prcs_source
 
 # Mercurial versions with which this extension has been tested.
@@ -34,6 +34,6 @@ def extsetup(ui):
     """
     set up the 'convert_prcs' extension
     """
-    source_converters.append(
+    convcmd.source_converters.append(
         (b"prcs", prcs_source, b"branchsort")
     )
