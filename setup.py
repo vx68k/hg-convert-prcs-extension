@@ -58,6 +58,7 @@ if __name__ == "__main__":
             "mercurial>=4.7",
             "prcslib>=1.0"
         ],
+        zip_safe=True,
 
         packages=[
             "hgext3rd.convert_prcs"
