@@ -190,8 +190,8 @@ class prcs_source(converter_source):
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
-                revision['author'], revision['date'].isoformat(" "),
-                descriptor.message(), parents, branch)
+            revision['author'], revision['date'].isoformat(),
+            descriptor.message(), parents, branch)
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
