@@ -23,10 +23,8 @@ PRCS source for the Mercurial convert extension
 import re
 import os
 import sys
-from mercurial import extensions
 from hgext.convert.common import NoRepo, commit, converter_source
-from hgext.convert.convcmd import source_converters
-from prcslib import PrcsVersion, PrcsProject, PrcsError, PrcsCommandError
+from prcslib import PrcsVersion, PrcsProject, PrcsError
 
 # Regular expression pattern that checks for main branches.
 _MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
