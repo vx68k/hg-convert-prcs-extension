@@ -24,7 +24,7 @@ from os import path
 from setuptools import setup
 
 # Package version.
-PACKAGE_VERSION = "1a1"
+PACKAGE_VERSION = "1a2"
 
 def long_description():
     """
@@ -56,8 +56,9 @@ if __name__ == "__main__":
         python_requires=">=2.7",
         install_requires=[
             "mercurial>=4.7",
-            "prcslib>=1.0b4"
+            "prcslib>=1.0"
         ],
+        zip_safe=True,
 
         packages=[
             "hgext3rd.convert_prcs"
