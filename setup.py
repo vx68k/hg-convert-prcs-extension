@@ -56,7 +56,7 @@ if __name__ == "__main__":
         python_requires=">=2.7",
         install_requires=[
             "mercurial>=4.7",
-            "prcslib>=1.0b4"
+            "prcslib>=1.0"
         ],
 
         packages=[
