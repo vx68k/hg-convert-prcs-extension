@@ -81,7 +81,7 @@ class prcs_source(converter_source):
 
     def getheads(self):
         last_minor_version = {}
-        for v in self._revisions.iterkeys():
+        for v in self._revisions:
             if not self._revisions[v]['deleted']:
                 v = PrcsVersion(v)
                 if last_minor_version.get(v.major(), 0) < v.minor():
