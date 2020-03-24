@@ -24,6 +24,7 @@ from __future__ import absolute_import, unicode_literals
 from hgext.convert.convcmd import source_converters
 from .prcs import prcs_source
 
+# Mercurial versions with which this extension has been tested.
 testedwith = "5.2.2"
 
 def extsetup(ui):
