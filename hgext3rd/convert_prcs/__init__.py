@@ -17,7 +17,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
-Mercurial extension to enable the PRCS source for the Convert extension
+Mercurial extension to enable the PRCS source in the convert extension
+
+PRCS is a legacy version control system. This extension makes it possible to
+convert a PRCS project to a new Mercurial repository.
 """
 
 from __future__ import absolute_import, unicode_literals
