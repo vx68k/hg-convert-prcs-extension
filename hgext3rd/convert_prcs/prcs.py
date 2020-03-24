@@ -42,8 +42,8 @@ class prcs_source(converter_source):
         super(prcs_source, self).__init__(ui, type, path, revs)
 
         try:
-            self._prcs = PrcsProject(path)
-            self._revisions = self._prcs.versions()
+            self._project = PrcsProject(path)
+            self._revisions = self._project.versions()
         except PrcsError:
             raise NoRepo(b"%s does not look like a PRCS project" % path)
 
@@ -56,7 +56,7 @@ class prcs_source(converter_source):
         if self._cached_descriptor.has_key(version):
             return self._cached_descriptor[version]
 
-        descriptor = self._prcs.descriptor(version)
+        descriptor = self._project.descriptor(version)
         self._cached_descriptor[version] = descriptor
         return descriptor
 
@@ -101,7 +101,7 @@ class prcs_source(converter_source):
             if a.has_key('symlink'):
                 return (a['symlink'], 'l')
 
-            self._prcs.checkout(version, [name])
+            self._project.checkout(version, [name])
             file = open(name, 'rb')
             content = file.read()
             file.close()
