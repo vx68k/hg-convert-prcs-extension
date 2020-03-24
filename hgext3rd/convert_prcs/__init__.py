@@ -20,7 +20,7 @@
 Mercurial extension to enable the PRCS source for the Convert extension
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 from hgext.convert.convcmd import source_converters
 from .prcs import prcs_source
 
