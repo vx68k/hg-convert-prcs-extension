@@ -83,7 +83,7 @@ class prcs_source(converter_source):
         last_minor_version = {}
         for v in self._revisions:
             if not self._revisions[v]['deleted']:
-                v = PrcsVersion(v)
+                v = PrcsVersion(v.decode())
                 if last_minor_version.get(v.major(), 0) < v.minor():
                     last_minor_version[v.major()] = v.minor()
         return map(
