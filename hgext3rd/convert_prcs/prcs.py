@@ -78,15 +78,18 @@ class prcs_source(converter_source):
         return version
 
     def getheads(self):
-        last_minor_version = {}
-        for v in self._revisions:
-            if not self._revisions[v]['deleted']:
-                v = PrcsVersion(v)
-                if last_minor_version.get(v.major(), 0) < v.minor():
-                    last_minor_version[v.major()] = v.minor()
+        """
+        return all the head versions of the PRCS source
+        """
+        last_minors = {}
+        for key in self._revisions:
+            if not self._revisions[key]["deleted"]:
+                version = PrcsVersion(key)
+                if last_minors.get(version.major(), 0) < version.minor():
+                    last_minors[version.major()] = version.minor()
         return map(
-            lambda item: str(PrcsVersion(item[0], item[1])).encode(),
-            last_minor_version.items())
+            lambda item: str(PrcsVersion(*item)).encode(),
+            last_minors.items())
 
     def getfile(self, name, version):
         revision = self._revisions[version]
