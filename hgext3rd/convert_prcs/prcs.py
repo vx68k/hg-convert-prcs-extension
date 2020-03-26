@@ -35,11 +35,11 @@ class prcs_source(converter_source):
     PRCS source class.
     """
 
-    def __init__(self, ui, type, path, revs=None):
+    def __init__(self, ui, scm, path, revs=None):
         """
         initialize a PRCS source
         """
-        super(prcs_source, self).__init__(ui, type, path, revs)
+        super(prcs_source, self).__init__(ui, scm, path, revs)
 
         try:
             self._project = PrcsProject(path.decode())
