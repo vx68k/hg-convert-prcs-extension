@@ -92,29 +92,32 @@ class prcs_source(converter_source):
             last_minors.items())
 
     def getfile(self, name, version):
-        revision = self._revisions[version]
+        """
+        get the content of a file
+        """
         descriptor = self._descriptor(version)
-
         files = descriptor.files()
-        try:
-            a = files[name]
-            if "symlink" in a:
-                return (a['symlink'], 'l')
+        if name.decode() in files:
+            attr = files[name.decode()]
+            if "symlink" in attr:
+                return attr["symlink"].encode(), b"l"
 
-            self._project.checkout(version, [name])
-            file = open(name, 'rb')
-            content = file.read()
-            file.close()
+            self._project.checkout(version, files=[name.decode()])
+
+            with open(name, "rb") as stream:
+                content = stream.read()
+
             # NOTE: Win32 does not always releases the file name.
-            if sys.platform != 'win32':
+            if sys.platform != "win32":
                 os.unlink(name)
                 dir = os.path.dirname(name)
                 if dir:
                     os.removedirs(dir)
-            return (content, 'x' if a['mode'] & (0x1 << 6) else '')
-        except KeyError:
-            # The file with the specified name was deleted.
-            return None, None
+
+            return content, b"x" if attr["mode"] & (0x1 << 6) else b""
+
+        # The file with the specified name was deleted.
+        return None, None
 
     def getchanges(self, version, full=False):
         version = version.decode()
