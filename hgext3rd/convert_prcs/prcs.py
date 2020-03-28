@@ -95,6 +95,7 @@ class prcs_source(converter_source):
         """
         get the content of a file
         """
+        version = version.decode()
         descriptor = self._descriptor(version)
         files = descriptor.files()
         if name.decode() in files:
@@ -133,7 +134,7 @@ class prcs_source(converter_source):
         if full or p is None:
             # This is the initial checkin so all files are affected.
             for name in f:
-                files.append((name.encode(), version))
+                files.append((name.encode(), version.encode()))
         else:
             pf = self._descriptor(p).files()
             # Handling added or changed files.
@@ -143,23 +144,23 @@ class prcs_source(converter_source):
                     if "symlink" in a:
                         if "symlink" not in pa:
                             # Changed from a regular file to a symlink.
-                            files.append((name.encode(), version))
+                            files.append((name.encode(), version.encode()))
                     elif "symlink" in pa:
                         # Changed from a symlink to a regular file.
-                        files.append((name.encode(), version))
+                        files.append((name.encode(), version.encode()))
                     elif a['id'] != pa['id'] \
                             or a['revision'] != pa['revision'] \
                             or (a['mode'] ^ pa['mode']) & (0x1 << 6):
-                        files.append((name.encode(), version))
+                        files.append((name.encode(), version.encode()))
                 else:
                     # Added.
-                    files.append((name.encode(), version))
+                    files.append((name.encode(), version.encode()))
             # Handling deleted or renamed files.
             pnamebyid = {}
             for pname, pa in pf.items():
                 if pname not in f:
                     # Removed (or renamed).
-                    files.append((pname.encode(), version))
+                    files.append((pname.encode(), version.encode()))
                 if "symlink" not in pa:
                     pnamebyid[pa['id']] = pname
             # Handling renamed files for copies.
