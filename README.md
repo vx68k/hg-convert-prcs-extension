@@ -1,8 +1,9 @@
 # Introduction
 
-The `hg-convert-prcs-extension` package adds the [PRCS][] source to the
-[convert extension][] for [Mercurial][].
+The [`convert_prcs` extension][hg-convert-prcs-extension] for [Mercurial][]
+enables the [PRCS][] source in the Mercurial [convert extension][].
 
+[hg-convert-prcs-extension]: https://pypi.org/project/hg-convert-prcs-extension/
 [PRCS]: http://prcs.sourceforge.net/
 [Mercurial]: https://www.mercurial-scm.org/
 [convert extension]: https://www.mercurial-scm.org/wiki/ConvertExtension
@@ -18,14 +19,10 @@ This program is provided under the terms and conditions of the
 
 [![(License)](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)][GPL-3.0]
 
-[GPL-3.0]: https://opensource.org/licenses/GPL-3.0 "GNU General Public License, version 3"
+[GPL-3.0]: https://opensource.org/licenses/GPL-3.0
 
 # Required software
 
 This extension requires the following software:
 
--   A working PRCS command which is available
-    [here](https://bitbucket.org/kazssym/prcs), and
--   Python module prcslib in
-    [prcs2hg](https://bitbucket.org/kazssym/prcs2hg) 2.0 which is not
-    released yet.
+  - [prcslib](https://pypi.org/project/prcslib/) 2.0 or later.
