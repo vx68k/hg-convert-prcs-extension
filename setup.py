@@ -28,7 +28,7 @@ from setuptools import setup
 PACKAGE_NAME = "hg-convert-prcs-extension"
 
 # Package version.
-PACKAGE_VERSION = "1.0"
+PACKAGE_VERSION = "2.0"
 
 def long_description():
     """
