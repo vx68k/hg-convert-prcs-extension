@@ -56,6 +56,8 @@ if __name__ == "__main__":
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 2.7",
+            "Topic :: Software Development :: Version Control",
         ],
         python_requires=">=2.7",
         install_requires=[
