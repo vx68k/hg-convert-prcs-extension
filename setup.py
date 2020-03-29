@@ -49,6 +49,9 @@ if __name__ == "__main__":
         version=PACKAGE_VERSION,
         description="PRCS source for the Mercurial convert extension.",
         url="https://vx68k.bitbucket.io/hg-convert-prcs/",
+        project_urls={
+            "GitHub": "https://github.com/vx68k/hg-convert-prcs-extension",
+        },
         author="Kaz Nishimura",
         author_email="kazssym@linuxfront.com",
         long_description=long_description(),
