@@ -20,13 +20,12 @@
 PRCS source for the Mercurial convert extension
 """
 
+from __future__ import absolute_import, unicode_literals
 import re
 import os
 import sys
-from mercurial import extensions
 from hgext.convert.common import NoRepo, commit, converter_source
-from hgext.convert.convcmd import source_converters
-from prcslib import PrcsVersion, PrcsProject, PrcsError, PrcsCommandError
+from prcslib import PrcsVersion, PrcsProject, PrcsError
 
 # Regular expression pattern that checks for main branches.
 _MAIN_BRANCH_RE = re.compile(r"^(\d+)$")
@@ -36,15 +35,15 @@ class prcs_source(converter_source):
     PRCS source class.
     """
 
-    def __init__(self, ui, type, path, revs=None):
+    def __init__(self, ui, scm, path, revs=None):
         """
         initialize a PRCS source
         """
-        super(prcs_source, self).__init__(ui, type, path, revs)
+        super(prcs_source, self).__init__(ui, scm, path, revs)
 
         try:
-            self._prcs = PrcsProject(path)
-            self._revisions = self._prcs.versions()
+            self._project = PrcsProject(path.decode())
+            self._revisions = self._project.versions()
         except PrcsError:
             raise NoRepo(b"%s does not look like a PRCS project" % path)
 
@@ -52,12 +51,10 @@ class prcs_source(converter_source):
 
     def _descriptor(self, version):
         """Return a revision descriptor with caching."""
-        if not isinstance(version, str):
-            version = str(version)
-        if self._cached_descriptor.has_key(version):
+        if version in self._cached_descriptor:
             return self._cached_descriptor[version]
 
-        descriptor = self._prcs.descriptor(version)
+        descriptor = self._project.descriptor(version)
         self._cached_descriptor[version] = descriptor
         return descriptor
 
@@ -81,44 +78,50 @@ class prcs_source(converter_source):
         return version
 
     def getheads(self):
-        last_minor_version = {}
-        for v in self._revisions.iterkeys():
-            if not self._revisions[v]['deleted']:
-                v = PrcsVersion(v)
-                if last_minor_version.get(v.major(), 0) < v.minor():
-                    last_minor_version[v.major()] = v.minor()
+        """
+        return all the head versions of the PRCS source
+        """
+        last_minors = {}
+        for key in self._revisions:
+            if not self._revisions[key]["deleted"]:
+                version = PrcsVersion(key)
+                if last_minors.get(version.major(), 0) < version.minor():
+                    last_minors[version.major()] = version.minor()
         return map(
-            lambda item: str(PrcsVersion(item[0], item[1])),
-            last_minor_version.iteritems())
+            lambda item: str(PrcsVersion(*item)).encode(),
+            last_minors.items())
 
     def getfile(self, name, version):
-        self.ui.debug("prcs_source.getfile: ", name, " ", version, "\n")
-        revision = self._revisions[version]
+        """
+        get the content of a file
+        """
+        version = version.decode()
         descriptor = self._descriptor(version)
-
         files = descriptor.files()
-        try:
-            a = files[name]
-            if a.has_key('symlink'):
-                return (a['symlink'], 'l')
+        if name.decode() in files:
+            attr = files[name.decode()]
+            if "symlink" in attr:
+                return attr["symlink"].encode(), b"l"
 
-            self._prcs.checkout(version, [name])
-            file = open(name, 'rb')
-            content = file.read()
-            file.close()
+            self._project.checkout(version, files=[name.decode()])
+
+            with open(name, "rb") as stream:
+                content = stream.read()
+
             # NOTE: Win32 does not always releases the file name.
-            if sys.platform != 'win32':
+            if sys.platform != "win32":
                 os.unlink(name)
                 dir = os.path.dirname(name)
                 if dir:
                     os.removedirs(dir)
-            return (content, 'x' if a['mode'] & (0x1 << 6) else '')
-        except KeyError:
-            # The file with the specified name was deleted.
-            return None, None
+
+            return content, b"x" if attr["mode"] & (0x1 << 6) else b""
+
+        # The file with the specified name was deleted.
+        return None, None
 
     def getchanges(self, version, full=False):
-        self.ui.debug("prcs_source.getchanges: ", version, "\n")
+        version = version.decode()
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
@@ -130,48 +133,47 @@ class prcs_source(converter_source):
         p = self._nearest_ancestor(p)
         if full or p is None:
             # This is the initial checkin so all files are affected.
-            for name in f.iterkeys():
-                files.append((name, version))
+            for name in f:
+                files.append((name.encode(), version.encode()))
         else:
             pf = self._descriptor(p).files()
             # Handling added or changed files.
-            for name, a in f.iteritems():
-                if pf.has_key(name):
+            for name, a in f.items():
+                if name in pf:
                     pa = pf[name]
-                    if a.has_key('symlink'):
-                        if not pa.has_key('symlink'):
+                    if "symlink" in a:
+                        if "symlink" not in pa:
                             # Changed from a regular file to a symlink.
-                            files.append((name, version))
-                    elif pa.has_key('symlink'):
+                            files.append((name.encode(), version.encode()))
+                    elif "symlink" in pa:
                         # Changed from a symlink to a regular file.
-                        files.append((name, version))
+                        files.append((name.encode(), version.encode()))
                     elif a['id'] != pa['id'] \
                             or a['revision'] != pa['revision'] \
                             or (a['mode'] ^ pa['mode']) & (0x1 << 6):
-                        files.append((name, version))
+                        files.append((name.encode(), version.encode()))
                 else:
                     # Added.
-                    files.append((name, version))
+                    files.append((name.encode(), version.encode()))
             # Handling deleted or renamed files.
             pnamebyid = {}
-            for pname, pa in pf.iteritems():
-                if not f.has_key(pname):
+            for pname, pa in pf.items():
+                if pname not in f:
                     # Removed (or renamed).
-                    files.append((pname, version))
-                if not pa.has_key('symlink'):
+                    files.append((pname.encode(), version.encode()))
+                if "symlink" not in pa:
                     pnamebyid[pa['id']] = pname
             # Handling renamed files for copies.
-            for name, a in f.iteritems():
-                if not a.has_key('symlink') and \
-                        pnamebyid.has_key(a['id']):
+            for name, a in f.items():
+                if "symlink" not in a and a['id'] in pnamebyid:
                     pname = pnamebyid[a['id']]
                     if name != pname:
-                        self.ui.note(pname, " was renamed to ", name, "\n")
-                        copies[name] = pname
+                        self.ui.note(b"%s was renamed to %s\n" % (pname.encode(), name.encode()))
+                        copies[name.encode()] = pname.encode()
         return files, copies, set()
 
     def getcommit(self, version):
-        self.ui.debug("prcs_source.getcommit: ", version, "\n")
+        version = version.decode()
         revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
@@ -180,19 +182,19 @@ class prcs_source(converter_source):
         # Preparing for a deleted parent.
         p = self._nearest_ancestor(p)
         if p is not None:
-            parents.append(str(p))
+            parents.append(str(p).encode())
         for mp in descriptor.mergeparents():
             # Preparing for a deleted merge parent.
             mp = self._nearest_ancestor(mp)
             if mp is not None:
-                parents.append(str(mp))
+                parents.append(str(mp).encode())
 
         branch = PrcsVersion(version).major()
         if _MAIN_BRANCH_RE.match(branch):
             branch = None
         return commit(
-                revision['author'], revision['date'].isoformat(" "),
-                descriptor.message(), parents, branch)
+            revision['author'].encode(), revision['date'].isoformat().encode(),
+            descriptor.message().encode(), parents, branch)
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
