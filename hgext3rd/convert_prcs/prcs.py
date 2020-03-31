@@ -43,7 +43,7 @@ class prcs_source(converter_source):
 
         try:
             self._project = PrcsProject(path.decode())
-            self._revisions = self._project.versions()
+            self._versions = self._project.versions()
         except PrcsError:
             raise NoRepo(b"%s does not look like a PRCS project" % path)
 
@@ -66,7 +66,7 @@ class prcs_source(converter_source):
             version = PrcsVersion(version)
 
         deleted = False
-        while self._revisions[str(version)]['deleted']:
+        while self._versions[str(version)]['deleted']:
             self.ui.note(version, " is deleted\n")
             deleted = True
             version = PrcsVersion(version.major(), version.minor() - 1)
@@ -82,8 +82,8 @@ class prcs_source(converter_source):
         return all the head versions of the PRCS source
         """
         last_minors = {}
-        for key in self._revisions:
-            if not self._revisions[key]["deleted"]:
+        for key in self._versions:
+            if not self._versions[key]["deleted"]:
                 version = PrcsVersion(key)
                 if last_minors.get(version.major(), 0) < version.minor():
                     last_minors[version.major()] = version.minor()
@@ -122,7 +122,7 @@ class prcs_source(converter_source):
 
     def getchanges(self, version, full=False):
         version = version.decode()
-        revision = self._revisions[version]
+        revision = self._versions[version]
         descriptor = self._descriptor(version)
 
         files = []
@@ -174,7 +174,7 @@ class prcs_source(converter_source):
 
     def getcommit(self, version):
         version = version.decode()
-        revision = self._revisions[version]
+        revision = self._versions[version]
         descriptor = self._descriptor(version)
 
         parents = []
