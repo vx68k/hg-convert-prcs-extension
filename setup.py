@@ -72,5 +72,4 @@ if __name__ == "__main__":
         packages=[
             "hgext3rd.convert_prcs"
         ],
-        test_suite="testsuite",
     )
