@@ -144,7 +144,6 @@ class prcs_source(converter_source):
 
     def getchanges(self, version, full=False):
         version = version.decode()
-        revision = self._versions[version]
         descriptor = self._descriptor(version)
 
         files = []
