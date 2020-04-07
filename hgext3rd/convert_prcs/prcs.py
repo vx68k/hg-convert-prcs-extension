@@ -120,6 +120,28 @@ class prcs_source(converter_source):
         # The file with the specified name was deleted.
         return None, None
 
+    def _removedfiles(self, version, files, parent_files):
+        """
+        Return a (files, copies) tuple for removed or renamed files.
+        """
+        changes = []
+        copies = {}
+        pnamebyid = {}
+        for pname, pa in parent_files.items():
+            if pname not in files:
+                changes.append((pname.encode(), version.encode()))
+            if "symlink" not in pa:
+                pnamebyid[pa['id']] = pname
+        # To process renamed files for copies.
+        for name, attr in files.items():
+            if not "symlink" in attr and attr['id'] in pnamebyid:
+                pname = pnamebyid[attr['id']]
+                if name != pname:
+                    self.ui.note(b"%s was renamed to %s\n" % \
+                        (pname.encode(), name.encode()))
+                    copies[name.encode()] = pname.encode()
+        return changes, copies
+
     def getchanges(self, version, full=False):
         version = version.decode()
         revision = self._versions[version]
@@ -155,21 +177,9 @@ class prcs_source(converter_source):
                 else:
                     # Added.
                     files.append((name.encode(), version.encode()))
-            # Handling deleted or renamed files.
-            pnamebyid = {}
-            for pname, pa in pf.items():
-                if pname not in f:
-                    # Removed (or renamed).
-                    files.append((pname.encode(), version.encode()))
-                if "symlink" not in pa:
-                    pnamebyid[pa['id']] = pname
-            # Handling renamed files for copies.
-            for name, a in f.items():
-                if "symlink" not in a and a['id'] in pnamebyid:
-                    pname = pnamebyid[a['id']]
-                    if name != pname:
-                        self.ui.note(b"%s was renamed to %s\n" % (pname.encode(), name.encode()))
-                        copies[name.encode()] = pname.encode()
+            # To process removed or renamed files.
+            removes, copies = self._removedfiles(version, f, pf)
+            files.extend(removes)
         return files, copies, set()
 
     def getcommit(self, version):
