@@ -91,19 +91,19 @@ class prcs_source(converter_source):
             lambda item: str(PrcsVersion(*item)).encode(),
             last_minors.items())
 
-    def getfile(self, name, version):
+    def getfile(self, name, rev):
         """
         get the content of a file
         """
-        version = version.decode()
-        descriptor = self._descriptor(version)
+        rev = rev.decode()
+        descriptor = self._descriptor(rev)
         files = descriptor.files()
         if name.decode() in files:
             attr = files[name.decode()]
             if "symlink" in attr:
                 return attr["symlink"].encode(), b"l"
 
-            self._project.checkout(version, files=[name.decode()])
+            self._project.checkout(rev, files=[name.decode()])
 
             with open(name, "rb") as stream:
                 content = stream.read()
