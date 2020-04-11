@@ -65,7 +65,7 @@ if __name__ == "__main__":
         python_requires=">=2.7",
         install_requires=[
             "mercurial>=4.7",
-            "prcslib>=2"
+            "prcslib>=4.1"
         ],
         zip_safe=True,
 
