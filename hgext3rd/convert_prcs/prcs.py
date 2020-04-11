@@ -149,15 +149,15 @@ class prcs_source(converter_source):
         files = []
         copies = {}
         f = descriptor.files()
-        p = descriptor.parent()
+        parent = descriptor.parent()
         # Preparing for a deleted parent.
-        p = self._nearest_ancestor(p)
-        if full or p is None:
+        parent = self._nearest_ancestor(parent)
+        if full or parent is None:
             # This is the initial checkin so all files are affected.
             for name in f:
                 files.append((name.encode(), version.encode()))
         else:
-            pf = self._descriptor(p).files()
+            pf = self._descriptor(parent).files()
             # Handling added or changed files.
             for name, a in f.items():
                 if name in pf:
@@ -187,11 +187,11 @@ class prcs_source(converter_source):
         descriptor = self._descriptor(version)
 
         parents = []
-        p = descriptor.parent()
+        parent = descriptor.parent()
         # Preparing for a deleted parent.
-        p = self._nearest_ancestor(p)
-        if p is not None:
-            parents.append(str(p).encode())
+        parent = self._nearest_ancestor(parent)
+        if not (parent is None):
+            parents.append(str(parent).encode())
         for mp in descriptor.mergeparents():
             # Preparing for a deleted merge parent.
             mp = self._nearest_ancestor(mp)
