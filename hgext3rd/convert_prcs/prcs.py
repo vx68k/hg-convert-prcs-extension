@@ -149,7 +149,7 @@ class prcs_source(converter_source):
         files = []
         copies = {}
         f = descriptor.files()
-        p = descriptor.parentversion()
+        p = descriptor.parent()
         # Preparing for a deleted parent.
         p = self._nearest_ancestor(p)
         if full or p is None:
@@ -187,7 +187,7 @@ class prcs_source(converter_source):
         descriptor = self._descriptor(version)
 
         parents = []
-        p = descriptor.parentversion()
+        p = descriptor.parent()
         # Preparing for a deleted parent.
         p = self._nearest_ancestor(p)
         if p is not None:
