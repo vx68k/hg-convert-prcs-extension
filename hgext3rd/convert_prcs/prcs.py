@@ -205,6 +205,12 @@ class prcs_source(converter_source):
             revision['author'].encode(), revision['date'].isoformat().encode(),
             descriptor.message().encode(), parents, branch)
 
+    def numcommits(self):
+        """
+        Return the number of commits.
+        """
+        return len(self._versions)
+
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
         return {}
