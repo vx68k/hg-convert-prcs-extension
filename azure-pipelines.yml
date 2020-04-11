@@ -14,16 +14,23 @@ stages:
     jobs:
       - job: Build
         pool:
-          vmImage: ubuntu-latest
+          vmImage: ubuntu-16.04
+        container: kazssym/python-prcs:3
         steps:
-          - task: UsePythonVersion@0
           - bash: |
-              pip install "setuptools>=38.6" wheel
+              pip install \
+                  "setuptools>=38.6" \
+                  unittest-xml-reporting \
+                  wheel
             displayName: Install dependencies
           - bash: |
-              python ./setup.py test
+              #python test/prepare.py test/testproject.prcs.b64
+              python -m xmlrunner discover -s test -o test-reports
             displayName: Test
+            env:
+              PRCS_REPOSITORY: $(Agent.TempDirectory)/PRCS
           - task: PublishTestResults@2
+            condition: succeededOrFailed()
           - bash: |
               python ./setup.py sdist bdist_wheel
             displayName: Create archives
