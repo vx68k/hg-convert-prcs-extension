@@ -7,9 +7,10 @@
             "command": "${config:python.pythonPath}",
             "args": [
                 "./setup.py",
-                "test"
+                "build"
             ],
-            "group": "build"
+            "group": "build",
+            "problemMatcher": []
         },
         {
             "label": "Rebuild",
@@ -18,9 +19,10 @@
             "args": [
                 "./setup.py",
                 "clean",
-                "test"
+                "build"
             ],
-            "group": "build"
+            "group": "build",
+            "problemMatcher": []
         },
         {
             "label": "Clean",
