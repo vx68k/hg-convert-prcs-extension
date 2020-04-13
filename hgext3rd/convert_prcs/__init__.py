@@ -24,6 +24,7 @@ convert a PRCS project to a new Mercurial repository.
 """
 
 from __future__ import absolute_import, unicode_literals
+
 from hgext.convert import convcmd
 from .prcs import prcs_source
 
