@@ -33,7 +33,7 @@ testedwith = "5.2.2"
 
 def extsetup(ui):
     """
-    set up the 'convert_prcs' extension
+    Set up the 'convert_prcs' extension.
     """
     convcmd.source_converters.append(
         (b"prcs", prcs_source, b"branchsort")
