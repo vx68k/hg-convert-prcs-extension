@@ -1,1 +1,2 @@
 include COPYING
+exclude hgext3rd/__init__.py
