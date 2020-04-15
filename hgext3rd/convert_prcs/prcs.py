@@ -190,7 +190,7 @@ class prcs_source(converter_source):
         parent = descriptor.parent()
         # Preparing for a deleted parent.
         parent = self._nearest_ancestor(parent)
-        if not (parent is None):
+        if not parent is None:
             parents.append(str(parent).encode())
         for mp in descriptor.mergeparents():
             # Preparing for a deleted merge parent.
