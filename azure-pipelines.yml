@@ -37,7 +37,8 @@ stages:
           - publish: dist
             artifact: dist
   - stage: Release
-    condition: >-
+    dependsOn: Default
+    condition:
       and(succeeded(),
         startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
     jobs:
