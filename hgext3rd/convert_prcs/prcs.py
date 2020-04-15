@@ -21,10 +21,10 @@ PRCS source for the Mercurial convert extension
 """
 
 from __future__ import absolute_import, unicode_literals
+
 import re
-import os
-import sys
 from hgext.convert.common import NoRepo, commit, converter_source
+from mercurial.util import unlinkpath
 from prcslib import PrcsVersion, PrcsProject, PrcsError
 
 # Regular expression pattern that checks for main branches.
@@ -105,15 +105,11 @@ class prcs_source(converter_source):
 
             self._project.checkout(rev, files=[name.decode()])
 
-            with open(name, "rb") as stream:
-                content = stream.read()
-
-            # NOTE: Win32 does not always releases the file name.
-            if sys.platform != "win32":
-                os.unlink(name)
-                dir = os.path.dirname(name)
-                if dir:
-                    os.removedirs(dir)
+            try:
+                with open(name, "rb") as stream:
+                    content = stream.read()
+            finally:
+                unlinkpath(name)
 
             return content, b"x" if attr["mode"] & (0x1 << 6) else b""
 
