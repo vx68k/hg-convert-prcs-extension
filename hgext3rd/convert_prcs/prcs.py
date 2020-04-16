@@ -93,8 +93,11 @@ class prcs_source(converter_source):
 
     def getfile(self, name, rev):
         """
-        get the content of a file
+        Return the content and mode of a file as a 'tuple' value
         """
+        if rev is None:
+            return None, None
+
         rev = rev.decode()
         descriptor = self._descriptor(rev)
         files = descriptor.files()
