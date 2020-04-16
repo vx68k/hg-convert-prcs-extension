@@ -101,23 +101,23 @@ class prcs_source(converter_source):
         rev = rev.decode()
         descriptor = self._descriptor(rev)
         files = descriptor.files()
-        if name.decode() in files:
-            attr = files[name.decode()]
-            if "symlink" in attr:
-                return attr["symlink"].encode(), b"l"
+        if not name.decode() in files:
+            self.ui.debug(b"%s not found for %s" % (name, rev.encode()))
+            return None, None
 
-            self._project.checkout(rev, files=[name.decode()])
+        attr = files[name.decode()]
+        if "symlink" in attr:
+            return attr["symlink"].encode(), b"l"
 
-            try:
-                with open(name, "rb") as stream:
-                    content = stream.read()
-            finally:
-                unlinkpath(name)
+        self._project.checkout(rev, files=[name.decode()])
 
-            return content, b"x" if attr["mode"] & (0x1 << 6) else b""
+        try:
+            with open(name, "rb") as stream:
+                content = stream.read()
+        finally:
+            unlinkpath(name)
 
-        # The file with the specified name was deleted.
-        return None, None
+        return content, b"x" if attr["mode"] & (0x1 << 6) else b""
 
     def _removedfiles(self, files, parentfiles):
         """
