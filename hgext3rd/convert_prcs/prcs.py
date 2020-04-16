@@ -119,16 +119,16 @@ class prcs_source(converter_source):
         # The file with the specified name was deleted.
         return None, None
 
-    def _removedfiles(self, version, files, parent_files):
+    def _removedfiles(self, files, parentfiles):
         """
         Return a (files, copies) tuple for removed or renamed files.
         """
         changes = []
         copies = {}
         pnamebyid = {}
-        for pname, pa in parent_files.items():
+        for pname, pa in parentfiles.items():
             if pname not in files:
-                changes.append((pname.encode(), version.encode()))
+                changes.append((pname.encode(), None))
             if "symlink" not in pa:
                 pnamebyid[pa['id']] = pname
         # To process renamed files for copies.
@@ -176,7 +176,7 @@ class prcs_source(converter_source):
                     # Added.
                     files.append((name.encode(), version.encode()))
             # To process removed or renamed files.
-            removes, copies = self._removedfiles(version, f, pf)
+            removes, copies = self._removedfiles(f, pf)
             files.extend(removes)
         return files, copies, set()
 
