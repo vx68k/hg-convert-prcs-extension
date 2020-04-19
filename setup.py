@@ -21,9 +21,8 @@ setup script for the 'hg-convert-prcs-extension' package
 """
 
 from __future__ import absolute_import
-
 from os import path
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # Package name.
 PACKAGE_NAME = "hg-convert-prcs-extension"
@@ -70,5 +69,7 @@ if __name__ == "__main__":
         ],
         zip_safe=True,
 
-        packages=find_packages(exclude=["test", "test.*"]),
+        packages=[
+            "hgext3rd.convert_prcs"
+        ],
     )
