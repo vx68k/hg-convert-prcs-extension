@@ -24,6 +24,9 @@ stages:
                   wheel
             displayName: Install dependencies
           - bash: |
+              python ./setup.py build
+            displayName: Build
+          - bash: |
               #python test/prepare.py test/testproject.prcs.b64
               python -m xmlrunner discover -s test -o test-reports
             displayName: Test
