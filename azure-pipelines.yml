@@ -55,7 +55,8 @@ stages:
             artifact: dist
           - task: UsePythonVersion@0
           - bash: |
-              pip install twine
+              pip install \
+                  twine
             displayName: Install upload dependencies
           - task: TwineAuthenticate@1
             inputs:
