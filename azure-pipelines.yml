@@ -27,7 +27,7 @@ stages:
               python ./setup.py build
             displayName: Build
           - bash: |
-              #python test/prepare.py test/testproject.prcs.b64
+              python test/prepare.py test/testproject.prcs.b64 || exit $?
               python -m xmlrunner discover -s test -o test-reports
             displayName: Test
             env:
