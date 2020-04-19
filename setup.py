@@ -21,6 +21,7 @@ setup script for the 'hg-convert-prcs-extension' package
 """
 
 from __future__ import absolute_import
+
 from os import path
 from setuptools import setup
 
@@ -28,7 +29,7 @@ from setuptools import setup
 PACKAGE_NAME = "hg-convert-prcs-extension"
 
 # Package version.
-PACKAGE_VERSION = "1.0"
+PACKAGE_VERSION = "2.0.0"
 
 def long_description():
     """
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         description="PRCS source for the Mercurial convert extension.",
         url="https://vx68k.bitbucket.io/hg-convert-prcs/",
         project_urls={
-            "GitHub": "https://github.com/vx68k/hg-convert-prcs-extension",
+            "Source": "https://github.com/vx68k/hg-convert-prcs-extension",
         },
         author="Kaz Nishimura",
         author_email="kazssym@linuxfront.com",
@@ -65,12 +66,11 @@ if __name__ == "__main__":
         python_requires=">=2.7",
         install_requires=[
             "mercurial>=4.7",
-            "prcslib>=2"
+            "prcslib>=4.1"
         ],
         zip_safe=True,
 
         packages=[
             "hgext3rd.convert_prcs"
         ],
-        test_suite="testsuite",
     )

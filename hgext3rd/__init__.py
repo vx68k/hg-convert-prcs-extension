@@ -1,4 +1,4 @@
-# __init__.py - initialization of the 'hgext3rd.convert_prcs' package
+# __init__.py - initialization of the 'hgext3rd' package
 # Copyright (C) 2020 Kaz Nishimura
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -17,24 +17,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
-Mercurial extension to enable the PRCS source in the convert extension
+empty package
 
-PRCS is a legacy version control system. This extension makes it possible to
-convert a PRCS project to a new Mercurial repository.
+This file is not for installation.
 """
-
-from __future__ import absolute_import, unicode_literals
-
-from hgext.convert import convcmd
-from .prcs import prcs_source
-
-# Mercurial versions with which this extension has been tested.
-testedwith = "5.2.2"
-
-def extsetup(ui):
-    """
-    Set up the 'convert_prcs' extension.
-    """
-    convcmd.source_converters.append(
-        (b"prcs", prcs_source, b"branchsort")
-    )

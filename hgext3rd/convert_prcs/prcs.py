@@ -21,10 +21,10 @@ PRCS source for the Mercurial convert extension
 """
 
 from __future__ import absolute_import, unicode_literals
+
 import re
-import os
-import sys
 from hgext.convert.common import NoRepo, commit, converter_source
+from mercurial.util import unlinkpath
 from prcslib import PrcsVersion, PrcsProject, PrcsError
 
 # Regular expression pattern that checks for main branches.
@@ -43,7 +43,7 @@ class prcs_source(converter_source):
 
         try:
             self._project = PrcsProject(path.decode())
-            self._revisions = self._project.versions()
+            self._versions = self._project.versions()
         except PrcsError:
             raise NoRepo(b"%s does not look like a PRCS project" % path)
 
@@ -66,7 +66,7 @@ class prcs_source(converter_source):
             version = PrcsVersion(version)
 
         deleted = False
-        while self._revisions[str(version)]['deleted']:
+        while self._versions[str(version)]['deleted']:
             self.ui.note(version, " is deleted\n")
             deleted = True
             version = PrcsVersion(version.major(), version.minor() - 1)
@@ -82,8 +82,8 @@ class prcs_source(converter_source):
         return all the head versions of the PRCS source
         """
         last_minors = {}
-        for key in self._revisions:
-            if not self._revisions[key]["deleted"]:
+        for key in self._versions:
+            if not self._versions[key]["deleted"]:
                 version = PrcsVersion(key)
                 if last_minors.get(version.major(), 0) < version.minor():
                     last_minors[version.major()] = version.minor()
@@ -91,52 +91,72 @@ class prcs_source(converter_source):
             lambda item: str(PrcsVersion(*item)).encode(),
             last_minors.items())
 
-    def getfile(self, name, version):
+    def getfile(self, name, rev):
         """
-        get the content of a file
+        Return the content and mode of a file as a 'tuple' value
         """
-        version = version.decode()
-        descriptor = self._descriptor(version)
+        if rev is None:
+            return None, None
+
+        rev = rev.decode()
+        descriptor = self._descriptor(rev)
         files = descriptor.files()
-        if name.decode() in files:
-            attr = files[name.decode()]
-            if "symlink" in attr:
-                return attr["symlink"].encode(), b"l"
+        if not name.decode() in files:
+            self.ui.debug(b"%s not found for %s" % (name, rev.encode()))
+            return None, None
 
-            self._project.checkout(version, files=[name.decode()])
+        attr = files[name.decode()]
+        if "symlink" in attr:
+            return attr["symlink"].encode(), b"l"
 
+        self._project.checkout(rev, files=[name.decode()])
+
+        try:
             with open(name, "rb") as stream:
                 content = stream.read()
+        finally:
+            unlinkpath(name)
 
-            # NOTE: Win32 does not always releases the file name.
-            if sys.platform != "win32":
-                os.unlink(name)
-                dir = os.path.dirname(name)
-                if dir:
-                    os.removedirs(dir)
+        return content, b"x" if attr["mode"] & (0x1 << 6) else b""
 
-            return content, b"x" if attr["mode"] & (0x1 << 6) else b""
-
-        # The file with the specified name was deleted.
-        return None, None
+    def _removedfiles(self, files, parentfiles):
+        """
+        Return a (files, copies) tuple for removed or renamed files.
+        """
+        changes = []
+        copies = {}
+        pnamebyid = {}
+        for pname, pa in parentfiles.items():
+            if pname not in files:
+                changes.append((pname.encode(), None))
+            if "symlink" not in pa:
+                pnamebyid[pa['id']] = pname
+        # To process renamed files for copies.
+        for name, attr in files.items():
+            if not "symlink" in attr and attr['id'] in pnamebyid:
+                pname = pnamebyid[attr['id']]
+                if name != pname:
+                    self.ui.note(b"%s was renamed to %s\n" % \
+                        (pname.encode(), name.encode()))
+                    copies[name.encode()] = pname.encode()
+        return changes, copies
 
     def getchanges(self, version, full=False):
         version = version.decode()
-        revision = self._revisions[version]
         descriptor = self._descriptor(version)
 
         files = []
         copies = {}
         f = descriptor.files()
-        p = descriptor.parentversion()
+        parent = descriptor.parent()
         # Preparing for a deleted parent.
-        p = self._nearest_ancestor(p)
-        if full or p is None:
+        parent = self._nearest_ancestor(parent)
+        if full or parent is None:
             # This is the initial checkin so all files are affected.
             for name in f:
                 files.append((name.encode(), version.encode()))
         else:
-            pf = self._descriptor(p).files()
+            pf = self._descriptor(parent).files()
             # Handling added or changed files.
             for name, a in f.items():
                 if name in pf:
@@ -155,34 +175,22 @@ class prcs_source(converter_source):
                 else:
                     # Added.
                     files.append((name.encode(), version.encode()))
-            # Handling deleted or renamed files.
-            pnamebyid = {}
-            for pname, pa in pf.items():
-                if pname not in f:
-                    # Removed (or renamed).
-                    files.append((pname.encode(), version.encode()))
-                if "symlink" not in pa:
-                    pnamebyid[pa['id']] = pname
-            # Handling renamed files for copies.
-            for name, a in f.items():
-                if "symlink" not in a and a['id'] in pnamebyid:
-                    pname = pnamebyid[a['id']]
-                    if name != pname:
-                        self.ui.note(b"%s was renamed to %s\n" % (pname.encode(), name.encode()))
-                        copies[name.encode()] = pname.encode()
+            # To process removed or renamed files.
+            removes, copies = self._removedfiles(f, pf)
+            files.extend(removes)
         return files, copies, set()
 
     def getcommit(self, version):
         version = version.decode()
-        revision = self._revisions[version]
+        revision = self._versions[version]
         descriptor = self._descriptor(version)
 
         parents = []
-        p = descriptor.parentversion()
+        parent = descriptor.parent()
         # Preparing for a deleted parent.
-        p = self._nearest_ancestor(p)
-        if p is not None:
-            parents.append(str(p).encode())
+        parent = self._nearest_ancestor(parent)
+        if not parent is None:
+            parents.append(str(parent).encode())
         for mp in descriptor.mergeparents():
             # Preparing for a deleted merge parent.
             mp = self._nearest_ancestor(mp)
@@ -195,6 +203,12 @@ class prcs_source(converter_source):
         return commit(
             revision['author'].encode(), revision['date'].isoformat().encode(),
             descriptor.message().encode(), parents, branch)
+
+    def numcommits(self):
+        """
+        Return the number of commits.
+        """
+        return len(self._versions)
 
     def gettags(self):
         """Return an empty dictionary since PRCS has no tags."""
