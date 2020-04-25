@@ -36,9 +36,6 @@ class prcs_source(converter_source):
     """
 
     def __init__(self, ui, scm, path, revs=None):
-        """
-        initialize a PRCS source
-        """
         super(prcs_source, self).__init__(ui, scm, path, revs)
 
         try:
@@ -50,7 +47,9 @@ class prcs_source(converter_source):
         self._cached_descriptor = {}
 
     def _descriptor(self, version):
-        """Return a revision descriptor with caching."""
+        """
+        Return the cached descriptor for a version.
+        """
         if version in self._cached_descriptor:
             return self._cached_descriptor[version]
 
@@ -59,7 +58,9 @@ class prcs_source(converter_source):
         return descriptor
 
     def _nearest_ancestor(self, version):
-        """Return an indirect parent for a deleted version."""
+        """
+        Return the nearest ancestor for a (deleted) version.
+        """
         if version is None:
             return None
         if isinstance(version, str):
@@ -78,9 +79,6 @@ class prcs_source(converter_source):
         return version
 
     def getheads(self):
-        """
-        return all the head versions of the PRCS source
-        """
         last_minors = {}
         for key in self._versions:
             if not self._versions[key]["deleted"]:
@@ -92,9 +90,6 @@ class prcs_source(converter_source):
             last_minors.items())
 
     def getfile(self, name, rev):
-        """
-        Return the content and mode of a file as a 'tuple' value
-        """
         if rev is None:
             return None, None
 
@@ -121,7 +116,7 @@ class prcs_source(converter_source):
 
     def _removedfiles(self, files, parentfiles):
         """
-        Return a (files, copies) tuple for removed or renamed files.
+        Return the removals and copies as a 'tuple' value.
         """
         changes = []
         copies = {}
@@ -205,11 +200,7 @@ class prcs_source(converter_source):
             descriptor.message().encode(), parents, branch)
 
     def numcommits(self):
-        """
-        Return the number of commits.
-        """
         return len(self._versions)
 
     def gettags(self):
-        """Return an empty dictionary since PRCS has no tags."""
         return {}
